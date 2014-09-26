@@ -72,6 +72,9 @@
             },
             //轮换view
             switchView: function() {
+                
+                //调用切换view开始事件
+                this.onViewSwitching();
 
                 this.curIndex++;
 
@@ -81,9 +84,6 @@
 
                     return false;
                 }
-
-                //调用切换view开始事件
-                this.onViewSwitching();
 
                 var switchObj = this;
 
