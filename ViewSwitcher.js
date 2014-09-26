@@ -1,5 +1,5 @@
 /**
- * Created by 赵晶浩 on 14-9-24.
+ * Created by zhaojinghao on 14-9-24.
  */
 
 //内容轮播器
