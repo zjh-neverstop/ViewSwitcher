@@ -31,7 +31,24 @@
             $('#' + id).css("top", top + "px");
             $('#' + id).css("left", left + "px");
         }
-
+        
+        //相对某个元素居中
+        function makeCenterInElement(id, targetEle) {
+            document.getElementById(id).style.display = "block";
+            var obj = $("#" + id);
+            var target = $(targetEle);
+            var targetWidth = target.width();
+            var targetHeight = target.height();
+            var selfWidth = obj.width();
+            var selfHeight = obj.height();
+            var left = target.get(0).offsetLeft + (targetWidth - selfWidth) / 2;
+            var top = target.get(0).offsetTop + (targetHeight - selfHeight) / 2;
+            $('#' + id).css("top", top + "px");
+            $('#' + id).css("left", left + "px");
+            console.debug(document.getElementById(id).style.display);
+            console.debug("left:" + left + "top:" + top);
+        }
+        
         var ViewSwitcher = function() {
             //属性定义
             this.curIndex = 0;
@@ -67,7 +84,7 @@
 
                 this.curIndex = 0;
                 var pid = this.pids[this.curIndex];
-
+                makeCenter("ajax-loader");
                 this.getDataForView(this.viewOneId, makeCenter, "carousel");
             },
             //轮换view
@@ -208,8 +225,11 @@
 
                     },
                     beforeSend: function() {
-                        console.debug("beforeSend");
-                        makeCenterInParent("ajax-loader");
+                        //console.debug("beforeSend");
+                        //makeCenterInParent("ajax-loader");
+                        if (document.getElementById("carousel").style.display == "block") {
+                            makeCenterInElement("ajax-loader", document.getElementById("carousel"));
+                        }
                     },
                     complete: function() {
                         console.debug("complete");
