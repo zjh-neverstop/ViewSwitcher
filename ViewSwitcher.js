@@ -80,27 +80,7 @@
         };
 
         ViewSwitcher.fn = ViewSwitcher.prototype = {
-            //轮播速度
-            speed : 1000,
-            //轮播方向
-            direction : "horizontal",
-            //view容器的宽度
-            width:0,
-            //view容器的高度
-            height:0,
-            //
-            datas:[],
-            //视图数组
-            views:[],
-            //是否循环轮播
-            isCircle:false,
-            //是否自动轮播，一般用于轮播静态内容
-            isAuto:false,
-            curIndex:-1,
-            domElement:"",
-            beforeViewSwitch:null,
-            afterViewSwitch:null,
-            beforeFinish:null,
+            
             //构造函数
             init : function(options){
                 //轮播速度
