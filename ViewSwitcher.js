@@ -130,7 +130,7 @@
                 this.curIndex = -1;
                 this.domElement = null;
                 this.beforeViewSwitch = null;
-                this.this.afterViewSwitch = null;
+                this.afterViewSwitch = null;
                 this.beforeFinish = null;
                 this.getViewData = null;
                 this.disabled = true;
@@ -164,28 +164,35 @@
 
             },
             onSwitching:function(){
-                if (typeof (this.beforeViewChange) === 'function') {
+                var self = this;
+                if (typeof (this.beforeViewSwitch) === 'function') {
                     try {
-                        this.beforeViewChange(this.getDatfillViewDataaForView);
+                        this.beforeViewSwitch(function(){
+                            //关闭轮播器
+                            if(self.useDynamicData == true && (self.curIndex==(self.staticDatas.length-1))&&self.isCircle==false){
+                                self.onClose();
+                            }
+                            self.fillViewData();
+                        });
                     }
                     catch (e) {
 
                     }
-                }else if(this.beforeViewChange == null){
+                }else if(this.beforeViewSwitch == null){
                     this.fillViewData();
                 }
             },
             onSwitched:function(){
-                if (typeof (this.afterViewChange) === 'function') {
+                if (typeof (this.afterViewSwitch) === 'function') {
                     try {
-                        this.afterViewChange();
+                        this.afterViewSwitch();
                     }
                     catch (e) {
 
                     }
                 }
             },
-            onFinish:function(){
+            onClose:function(){
                 if (typeof (this.beforeFinish) === 'function') {
                     try {
                         this.beforeFinish();
@@ -195,19 +202,22 @@
                     }
                 }
             },
-
+            //填充数据
             fillViewData:function(){
+                var self = this;
                 if(this.useDynamicData == true && (this.curIndex!=(this.staticDatas.length-1))){
-                    this.onFinish();
+                    this.onViewSwitched();
                 }
 
                 var view = getBackgroundView(this.views);
                 if(this.useDynamicData == false){
-                    views.innerHTML = this.staticDatas[++this.curIndex];
+                    view.innerHTML = this.staticDatas[++this.curIndex];
                 }
-                else if(typeof (this.getDataForView) === 'function'){
-                    this.getDataForView(function(data){
-
+                else if(typeof (this.getViewData) === 'function'){
+                    this.getViewData(function(data){
+                        view.innerHTML = data;
+                        //TODO 调用轮播动画
+                        self.onSwitched();
                     });
                 }
             }
