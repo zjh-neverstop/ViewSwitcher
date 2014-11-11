@@ -73,11 +73,6 @@
             }
         };
 
-        //在动画开始之前，将view放到合适的位置
-        var setup =  function(){
-
-        };
-
         var ViewManager = function(){
             this.Views = [];    //view数组
             this.animates = {}; //动画执行函数集合
@@ -89,7 +84,18 @@
         };
 
         ViewManager.prototype = {
+            self:this,
+            //动画定义
+            animateOptions:{
+                //params in ["left","right","top","bottom"]
+                move:function(params){ //平移
 
+                },
+                //params in ["in","out"]
+                fade:function(params){ //淡入淡出
+
+                }
+            }
         };
 
         return ViewManager;
@@ -98,9 +104,9 @@
     /**
      * 轮播器
      */
-    var ViewSwitcher = (function(){
+    var ViewSwitcher = (function(options){
 
-        var ViewSwitcher = function(){
+        var ViewSwitcher = function(options){
             return new ViewSwitcher.fn.init();
         };
 
@@ -108,32 +114,22 @@
 
             //构造函数
             init : function(options){
-                //轮播速度
-                this.speed = options.speed||1000;
-                //轮播方向
-                this.direction = options.direction||"horizontal";
-                this.datas = options.datas||[];
-                //view容器的宽度
-                this.width = 0;
-                //view容器的高度
-                this.height = 0;
-                //静态数据
-                this.staticDatas = [];
                 //视图数组
                 this.views = [];
-                //是否循环轮播
-                this.isCircle = false;
-                //是否自动轮播，如果是动态获取视图数据，建议禁用该项
-                this.isAuto = false;
-                //是否动态获取数据
-                this.useDynamicData = false;
-                this.curIndex = -1;
-                this.domElement = null;
+                this.status = "";
+                this.domElement = "";//(typeof options.id==='string'&&options.wrapid.length>0)?document.getElementById(options.id):document.getElementById("viewSwitcherWrap");
+
+                /*-- 定义相关事件 --*/
                 this.beforeViewSwitch = null;
                 this.afterViewSwitch = null;
                 this.beforeFinish = null;
-                this.getViewData = null;
+                this.fillViewData = null;
+
+                //状态
                 this.disabled = true;
+
+                //动画
+                this.viewAnimate = null;
 
                 if(options.id&&(typeof options.id === "string")){
                     this.domElement = document.getElementById(options.id);
@@ -148,7 +144,6 @@
              * 启动轮播器，显示第一个view
              */
             startup:function(){
-                this.curIndex = 0;
 
             },
             /**
@@ -158,6 +153,8 @@
                 //是否禁用轮播
                 if(this.disabled){
                     return;
+                }else{
+                    this.disabled = true; //防止频繁点击
                 }
 
                 this.onSwitching();
@@ -168,34 +165,40 @@
                 if (typeof (this.beforeViewSwitch) === 'function') {
                     try {
                         this.beforeViewSwitch(function(){
-                            //关闭轮播器
-                            if(self.useDynamicData == true && (self.curIndex==(self.staticDatas.length-1))&&self.isCircle==false){
-                                self.onClose();
-                            }
-                            self.fillViewData();
+                            self.onDataBinding();
                         });
                     }
                     catch (e) {
 
                     }
-                }else if(this.beforeViewSwitch == null){
-                    this.fillViewData();
                 }
+                else{
+                    this.onDataBinding();
+                }
+
             },
             onSwitched:function(){
+                var self = this;
                 if (typeof (this.afterViewSwitch) === 'function') {
                     try {
-                        this.afterViewSwitch();
+                        this.afterViewSwitch(function(){
+                            self.disabled = false;
+                        });
                     }
                     catch (e) {
 
                     }
                 }
+                else{
+                    self.disabled = false;
+                }
             },
             onClose:function(){
                 if (typeof (this.beforeFinish) === 'function') {
                     try {
-                        this.beforeFinish();
+                        this.beforeFinish(function(){
+                            self.domElement.style.display = "none";
+                        });
                     }
                     catch (e) {
 
@@ -203,33 +206,39 @@
                 }
             },
             //填充数据
-            fillViewData:function(){
+            onDataBinding:function(){
                 var self = this;
-                if(this.useDynamicData == true && (this.curIndex!=(this.staticDatas.length-1))){
-                    this.onViewSwitched();
-                }
 
                 var view = getBackgroundView(this.views);
-                if(this.useDynamicData == false){
-                    view.innerHTML = this.staticDatas[++this.curIndex];
-                }
-                else if(typeof (this.getViewData) === 'function'){
-                    this.getViewData(function(data){
-                        view.innerHTML = data;
-                        //TODO 调用轮播动画
-                        self.onSwitched();
+
+                if(typeof (this.fillViewData) === 'function'){
+                    this.fillViewData(function(){
+
+                        //判断是否有数据，如果没有需要关闭轮播器
+                        if(self.status == "close"){
+                            self.onClose();
+                            return;
+                        }
+
+                        //TODO 调用轮播动画，需使用者自己实现
+                        if(typeof (this.viewAnimate) === 'function'){
+                            self.viewAnimate(function(){
+                                self.onSwitched();
+                            });
+                        }
+
                     });
                 }
-            }
 
-        };
 
-        /**
-         * 获取不可见view
-         * @param views
-         * @returns {*}
-         */
-        function getBackgroundView(views){
+            },
+
+            /**
+             * 获取不可见view
+             * @param views
+             * @returns {*}
+             */
+            getBackgroundView:function(){
             var count = views.length;
             var result;
             for(var i =0 ;i <count;i++){
@@ -239,6 +248,10 @@
             }
             return result;
         }
+
+        };
+
+
 
         //覆盖init的原型对象
         ViewSwitcher.fn.init.prototype = ViewSwitcher.fn;

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <style type="text/css">
+        #switchWrap{
+            position:relative;
+            border:solid 1px lightgray;
+        }
+
+        #view1,#view2{
+            position:absolute;
+            border:solid 1px lightgray;
+            margin:auto;
+        }
+        #left,#right{
+            position:relative;
+            width: 10px;
+        }
+    </style>
+    <script type="text/javascript" src="ViewSwitcher.js"></script>
+    <script type="text/javascript">
+        var options = {
+            id:"switchWrap",
+            viewids :["left","right"]
+        };
+        var viewSwitcher = ViewSwitcher();
+        var datas = null;
+        var curIndex = 0
+
+        viewSwitcher.beforeViewChange=function(callback){
+
+            //TODO 切换事件
+            callback();
+        };
+
+        viewSwitcher.fillViewData = function(callback){
+            //TODO 获取view数据
+            try{
+                var data = datas[curIndex++];
+            }
+            catch(e){
+                viewSwitcher.status = "close";
+            }
+
+            callback();
+        };
+
+        viewSwithcer.afterViewChange = function(callback){
+            //TODO 切换结束事件
+            callback();
+        };
+
+        viewSwitcher.beforeFinish = function(){
+
+        };
+
+        $("#left").on("click",function(){
+            viewSwitcher.switch();
+            viewSwitcher.viewAnimate=function(){
+                var width,height;
+                var view = viewSwitcher.getBackgroundView();
+                var $view = $(view);
+                width = $view.width();
+                height = $view.height();
+                $(view).animate({
+                    left:"-="+width+"px"
+                });
+
+
+            };
+        });
+
+        $("#right").on("click",function(){
+            viewSwitcher.switch();
+            viewSwitcher.viewAnimate=function(){
+                var width,height;
+                var view = viewSwitcher.getBackgroundView();
+                var $view = $(view);
+                width = $view.width();
+                height = $view.height();
+                $(view).animate({
+                    left:"-="+width+"px"
+                });
+            };
+        });
+
+    </script>
+</head>
+<body>
+    <div id="switchWrap">
+        <div id="view1"></div>
+        <div id="view2"></div>
+        <span id="left"></span>
+        <span id="right"></span>
+    </div>
+</body>
+</html>
